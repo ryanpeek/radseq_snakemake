@@ -1,0 +1,3 @@
+Lane	Sample	Well	Metadata
+SOMM513	AAATGG	A01	notes
+SOMM513	AACGTT	A02	notes
