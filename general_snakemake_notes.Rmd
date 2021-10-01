@@ -1,0 +1,133 @@
+---
+title: "General `snakemake` notes"
+description: |
+  Learning snakemake
+date: "Updated `r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(here)
+library(knitr)
+library(glue)
+```
+
+
+This is just stream of consciousness general notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk. :)
+
+## Rules
+
+### Running Rules
+
+Can't run single rules with wildcards, but can run up-to a specific rule.
+
+Try to run up to (but not run) the `samtools_genome_coverage`
+
+```
+snakemake --until samtools_genome_coverage
+```
+
+### View Rules
+
+`grep rule Snakefile`
+
+### Run a Single Rule
+
+```
+snakemake name_of_rule
+```
+
+## Call a Script
+
+Use the `script` invocation. If using `shell:` with multiple lines, use the following
+
+```
+rule clean:
+	shell:
+		"""
+		  do some things here
+		  then do some more
+		  can use a "\" to separate to another lines
+		"""
+```
+
+## Dry Run!
+
+dry-run, print shell commands and reason for execution
+
+`snakemake -n –p -r`
+
+## SLURM!
+
+to just execute with more cores, try this:
+
+`snakemake --cores 8`
+
+There's a nice list of tricks here:
+ - https://github.com/dib-lab/farm-notes/blob/master/snakemake-slurm.md
+
+Best practice is to submit one job at a time and specify via yml file:
+
+```
+# cluster_config.yml - cluster configuration
+__default__:
+    account: ctbrowngrp
+    partition: med
+    time: 1-00:05:00 # time limit per job (1 day, 5 min; fmt = dd-hh:mm:ss)
+    nodes: 1 # per job
+    ntasks-per-node: 1 # per job
+    chdir: /home/rapeek/projects/  # working directory for batch script
+    output: slurm-%j.out
+    error: slurm-%j.err
+```
+
+**Even if you tell snakemake where to find this file, it's not going to use all of these parameters to submit each job, it will only use the ones you specify in the sbatch portion of your --cluster statement.**
+
+To specify specific details for a rule (maybe more for alignment and less for gunzip fastqc), specify for a specific rule, in the `cluster_config` file. If there's a `fastqc_raw` rule, add the following:
+
+```
+fastqc_raw:
+	time: 00:60:00
+```
+
+To run on the cluster using custom settings for local yml file:
+```
+# example 1:
+snakemake --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster.nodes}" \ 
+	--cluster-config cluster_conf/farm_config.yml --jobs 2 --latency-wait=15 --use-conda
+```
+
+To run on cluster using default global file:
+
+```
+# example 2
+snakemake --cluster "sbatch -t {cluster.time} -p {cluster.partition} --mem={cluster.mem}" --cluster-config ~/.config/snakemake/slurm/cluster_config.yml --jobs 2 --latency-wait=15 --use-conda
+```
+
+
+## Example snakefiles:::	
+
+This one is awesome and large:
+
+ - https://github.com/dib-lab/2020-ibd/blob/master/Snakefile#L332
+
+## To Run with a Script
+
+```
+rule make_hash_abund_table_long_normalized:
+    input: 
+        expand("outputs/filt_sigs_named_csv/{library}_filt_named.csv", library = LIBRARIES)
+    output: csv = "outputs/hash_tables/normalized_abund_hashes_long.csv"
+    conda: 'envs/r.yml'
+    script: "scripts/normalized_hash_abund_long.R"
+	
+```
+
+and to save/access input: https://github.com/dib-lab/2020-ibd/blob/master/scripts/normalized_hash_abund_long.R
+
+# RESOURCES
+
+- https://youtu.be/j-Axa_qZjh8
+- http://bluegenes.github.io/Using-Snakemake_Profiles/
+- tutorial: https://cfde-training-and-engagement.readthedocs-hosted.com/en/abhijna_gwas/Bioinformatics-Tutorials/Snakemake_tutorial/snakemake_2/
