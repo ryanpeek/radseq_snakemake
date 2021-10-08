@@ -131,3 +131,35 @@ and to save/access input: https://github.com/dib-lab/2020-ibd/blob/master/script
 - https://youtu.be/j-Axa_qZjh8
 - http://bluegenes.github.io/Using-Snakemake_Profiles/
 - tutorial: https://cfde-training-and-engagement.readthedocs-hosted.com/en/abhijna_gwas/Bioinformatics-Tutorials/Snakemake_tutorial/snakemake_2/
+
+
+## Notes
+
+How to manage envs? Having different envs for different rules.
+ 
+  - taylorreiter/2021-orpheum-refseq/envs
+
+ - https://github.com/taylorreiter/2021-orpheum-refseq/blob/main/Snakefile#L171
+ - 
+  
+How to run `R script` from rule?
+
+```
+
+rule summarize_coding_assemblies:
+    input:
+        aa=expand("outputs/assembly_stats/{acc}_aa.txt", acc = ACC),
+        bp=expand("outputs/assembly_stats/{acc}_total_bp.txt", acc = ACC)
+    output: tsv = "outputs/assembly_stats/all_assembly_stats.tsv"
+    threads: 1
+    resources: mem_mb = 4000
+    conda: "envs/tidyverse.yml"
+    script: "scripts/combine_assembly_stats.R"
+    
+```
+
+Use snakemake@input[["name"]] to access in R. Often best to `unlist` 
+
+### Running Rmd
+
+ - https://github.com/dib-lab/2020-ibd/blob/master/snakemake_figure_rmd.Rmd
