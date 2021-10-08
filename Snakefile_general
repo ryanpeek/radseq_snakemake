@@ -1,17 +1,35 @@
-import pandas as pd
+# import pandas as pd
 
-m = pd.read_csv("samples/pulex_samples.txt", sep = "\t", header = 0)
-SAMPLES = m['Sample'].unique().tolist()
-LANE = m['Lane'].unique().tolist() # sommX
+PLATE = ["TCAGTT",
+"CGTCTT",
+"CTCATT",
+"TCTTGT",
+"CGCTGT",
+"GTATGT",
+"CATGGT",
+"GGGGGT",
+"AAGAGT",
+"GCCAGT",
+"ATGGCT",
+"TGCGCT",
+"GACCCT",
+"ACACCT",
+"CCTACT",
+"CGATTG"]
+
+# m = pd.read_csv("samples/radseq_plate_summary_updated_2021-01-11.csv", header = 0)
+# PLATE = m['plate_barcode'].unique().tolist()
+# LANE = m['Lane'].unique().tolist() # somm
+LANE = ["so504"]
 READS = ["1", "2"]
 
 rule all:
     input: 
-        expand("outputs/split_fastq/{lane}_{sample}_{reads}.fastq", lane = LANE, sample = SAMPLES, reads = READS)
+        expand("outputs/split_fastq/{lane}_{plate}_R{reads}.fastq", lane = LANE, plate = PLATE, reads = READS)
 
 
 rule unzip:
-    input: "inputs/raw/{lane}_{reads}.fastq.gz"
+    input: "../../ronca/raw/{lane}_CKDL200163818-1a_HCJKCCCX2_L7_{reads}.fq.gz"
     output: "inputs/fastq/{lane}_{reads}.fastq"
     shell:'''
     gunzip -c {input} > {output}
@@ -19,9 +37,9 @@ rule unzip:
 
 rule barcode_split_fastq:
     input: "inputs/fastq/{lane}_{reads}.fastq"
-    output: "outputs/split_fastq/{lane}_{sample}_{reads}.fastq" 
+    output: "outputs/split_fastq/{lane}_{plate}_R{reads}.fastq" 
     shell:"""
-    grep --no-group-separator -A 3 ":{wildcards.sample}" {input} > {output}
+    grep --no-group-separator -A 3 ":{wildcards.plate}" {input} > {output}
     """
 
 # TODO combine across lanes, use this approach as a template to cat either fastqs or bams
