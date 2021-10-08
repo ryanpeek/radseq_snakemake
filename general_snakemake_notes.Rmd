@@ -98,6 +98,10 @@ snakemake --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster
 	--cluster-config cluster_conf/farm_config.yml --jobs 2 --latency-wait=15 --use-conda
 ```
 
+Important when running, add the following to rerun easily from incomplete sessions:
+`snakemake -j X --rerun-incomplete`
+
+
 To run on cluster using default global file:
 
 ```
