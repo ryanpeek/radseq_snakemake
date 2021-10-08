@@ -1,0 +1,35 @@
+---
+title: "vim notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## General `vim` Notes
+
+
+Some use tips and tricks.
+
+```
+:set nu  # set line numbers
+:tabnew  # start a new tab
+gt   # scroll between tabs
+GG   # go to bottom of file
+gg   # go to top of file
+
+yy #yank
+dd #delete
+d$ #delete to end of line from where cursor currently is
+
+```
+
+To switch between different tabs:
+
+```
+gt
+```
+
+To keep vim open: `Ctrl + z`, and return or reopen: `gt`
+
