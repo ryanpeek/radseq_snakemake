@@ -4,4 +4,6 @@
 .Ruserdata
 *.Rproj
 *.DS_Store
-
+.snakemake
+inputs/*
+outputs/*
