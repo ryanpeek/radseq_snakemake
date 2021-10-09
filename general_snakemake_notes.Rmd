@@ -64,6 +64,8 @@ to just execute with more cores, try this:
 
 `snakemake --cores 8`
 
+*check jobs with `squeue -u rapeek`*
+
 There's a nice list of tricks here:
  - https://github.com/dib-lab/farm-notes/blob/master/snakemake-slurm.md
 

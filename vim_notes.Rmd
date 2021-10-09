@@ -33,3 +33,15 @@ gt
 
 To keep vim open: `Ctrl + z`, and return or reopen: `gt`
 
+## Column Wise Edits
+
+ - Move cursor to location you want to work from
+ - Press `Ctrl + v` 
+ - then mark across the column you want to edit 
+ - Use `shift + g` to move to bottom, `gg` to top
+    - `Shift + i` to insert text at the beginning of the column
+    - `Shift + a` to append text,
+    - `r` to replace highlighted text, 
+    - `d` to delete, 
+    - `c` to change
+  - Press escape when done
