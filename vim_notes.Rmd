@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## General `vim` Notes
 
 
-Some use tips and tricks.
+Some use tips and tricks. See [here](https://ryanpeek.org/radseq/background_bash.html)
 
 ```
 :set nu  # set line numbers
