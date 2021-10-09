@@ -1,46 +1,34 @@
-# import pandas as pd
-
-PLATE = ["TCAGTT",
-"CGTCTT",
-"CTCATT",
-"TCTTGT",
-"CGCTGT",
-"GTATGT",
-"CATGGT",
-"GGGGGT",
-"AAGAGT",
-"GCCAGT",
-"ATGGCT",
-"TGCGCT",
-"GACCCT",
-"ACACCT",
-"CCTACT",
-"CGATTG"]
-
-# m = pd.read_csv("samples/radseq_plate_summary_updated_2021-01-11.csv", header = 0)
-# PLATE = m['plate_barcode'].unique().tolist()
-# LANE = m['Lane'].unique().tolist() # somm
-LANE = ["so504"]
+import pandas as pd
+m = pd.read_csv("samples/ronca_metadata_final.csv", header = 0)
+PLATES = m['plate_barcode'].unique().tolist() 
+#SAMPLES = m['well_barcode'].unique().tolist() # well barcode
+LANES = m['seqsomm'].unique().tolist() # somm
 READS = ["1", "2"]
 
 rule all:
     input: 
-        expand("outputs/split_fastq/{lane}_{plate}_R{reads}.fastq", lane = LANE, plate = PLATE, reads = READS)
-
+        expand("outputs/split_fastq/{lane}_{plate}_R{reads}.fastq", lane = LANES, plate = PLATES, read = READS)
 
 rule unzip:
-    input: "../../ronca/raw/{lane}_CKDL200163818-1a_HCJKCCCX2_L7_{reads}.fq.gz"
-    output: "inputs/fastq/{lane}_{reads}.fastq"
+    input: "../../ronca/raw/{lane}_CKDL200163818-1a_HCJKCCCX2_L7_{read}.fq.gz"
+    output: "inputs/fastq/{lane}_R{read}.fastq"
     shell:'''
     gunzip -c {input} > {output}
     '''
 
 rule barcode_split_fastq:
-    input: "inputs/fastq/{lane}_{reads}.fastq"
-    output: "outputs/split_fastq/{lane}_{plate}_R{reads}.fastq" 
+    input: "inputs/fastq/{lane}_R{read}.fastq"
+    output: "outputs/split_fastq/{lane}_{plate}_R{read}.fastq" 
     shell:"""
     grep --no-group-separator -A 3 ":{wildcards.plate}" {input} > {output}
     """
+
+#rule well_split_fastq:
+#    input: "inputs/split_fastq/{lane}_{plate}_R{read}.fastq"
+#    output: "outputs/split_fastq/{lane}_{plate}_{sample}_R{read}.fastq" 
+#    shell:"""
+#    /home/rapeek/projects/SEQS/code/BarcodeSplit_RAD_PE.2019.pl {output}_R{read}.fastq {output}_R{read}.fastq GGACAAGCTATGCAGG,GGAAACATCGTGCAGG,GGACATTGGCTGCAGG,GGACCACTGTTGCAGG,GGAACGTGATTGCAGG,GGCGCTGATCTGCAGG,GGCAGATCTGTGCAGG,GGATGCCTAATGCAGG,GGAACGAACGTGCAGG,GGAGTACAAGTGCAGG,GGCATCAAGTTGCAGG,GGAGTGGTCATGCAGG,GGAACAACCATGCAGG,GGAACCGAGATGCAGG,GGAACGCTTATGCAGG,GGAAGACGGATGCAGG,GGAAGGTACATGCAGG,GGACACAGAATGCAGG,GGACAGCAGATGCAGG,GGACCTCCAATGCAGG,GGACGCTCGATGCAGG,GGACGTATCATGCAGG,GGACTATGCATGCAGG,GGAGAGTCAATGCAGG,GGAGATCGCATGCAGG,GGAGCAGGAATGCAGG,GGAGTCACTATGCAGG,GGATCCTGTATGCAGG,GGATTGAGGATGCAGG,GGCAACCACATGCAGG,GGCAAGACTATGCAGG,GGCAATGGAATGCAGG,GGCACTTCGATGCAGG,GGCAGCGTTATGCAGG,GGCATACCAATGCAGG,GGCCAGTTCATGCAGG,GGCCGAAGTATGCAGG,GGCCGTGAGATGCAGG,GGCCTCCTGATGCAGG,GGCGAACTTATGCAGG,GGCGACTGGATGCAGG,GGCGCATACATGCAGG,GGCTCAATGATGCAGG,GGCTGAGCCATGCAGG,GGCTGGCATATGCAGG,GGGAATCTGATGCAGG,GGGACTAGTATGCAGG,GGGAGCTGAATGCAGG,GGGATAGACATGCAGG,GGGCCACATATGCAGG,GGGCGAGTAATGCAGG,GGGCTAACGATGCAGG,GGGCTCGGTATGCAGG,GGGGAGAACATGCAGG,GGGGTGCGAATGCAGG,GGGTACGCAATGCAGG,GGGTCGTAGATGCAGG,GGGTCTGTCATGCAGG,GGGTGTTCTATGCAGG,GGTAGGATGATGCAGG,GGTATCAGCATGCAGG,GGTCCGTCTATGCAGG,GGTCTTCACATGCAGG,GGTGAAGAGATGCAGG,GGTGGAACAATGCAGG,GGTGGCTTCATGCAGG,GGTGGTGGTATGCAGG,GGTTCACGCATGCAGG,GGACACGAGATGCAGG,GGAAGAGATCTGCAGG,GGAAGGACACTGCAGG,GGAATCCGTCTGCAGG,GGAATGTTGCTGCAGG,GGACACTGACTGCAGG,GGACAGATTCTGCAGG,GGAGATGTACTGCAGG,GGAGCACCTCTGCAGG,GGAGCCATGCTGCAGG,GGAGGCTAACTGCAGG,GGATAGCGACTGCAGG,GGACGACAAGTGCAGG,GGATTGGCTCTGCAGG,GGCAAGGAGCTGCAGG,GGCACCTTACTGCAGG,GGCCATCCTCTGCAGG,GGCCGACAACTGCAGG,GGAGTCAAGCTGCAGG,GGCCTCTATCTGCAGG,GGCGACACACTGCAGG,GGCGGATTGCTGCAGG,GGCTAAGGTCTGCAGG,GGGAACAGGCTGCAGG,GGGACAGTGCTGCAGG,GGGAGTTAGCTGCAGG,GGGATGAATCTGCAGG,GGGCCAAGACTGCAGG {plate}
+#    """
 
 # TODO combine across lanes, use this approach as a template to cat either fastqs or bams
 #rule cat_libraries_R2:
