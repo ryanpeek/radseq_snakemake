@@ -7,7 +7,7 @@ READS = ["1", "2"]
 
 rule all:
     input: 
-        expand("outputs/split_fastq/{lane}_{plate}_R{reads}.fastq", lane = LANES, plate = PLATES, read = READS)
+        expand("outputs/split_fastq/{lane}_{plate}_R{read}.fastq", lane = LANES, plate = PLATES, read = READS)
 
 rule unzip:
     input: "../../ronca/raw/{lane}_CKDL200163818-1a_HCJKCCCX2_L7_{read}.fq.gz"
