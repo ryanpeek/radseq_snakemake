@@ -14,7 +14,7 @@ Some use tips and tricks. See [here](https://ryanpeek.org/radseq/background_bash
 
 ```
 :set nu  # set line numbers
-:tabnew  # start a new tab
+:tabnew  # start a new tab + file name or dir for existing files
 gt   # scroll between tabs
 GG   # go to bottom of file
 gg   # go to top of file
@@ -31,7 +31,7 @@ To switch between different tabs:
 gt
 ```
 
-To keep vim open: `Ctrl + z`, and return or reopen: `gt`
+To keep vim open: `Ctrl + z`, and return or reopen: `fg`
 
 ## Column Wise Edits
 
