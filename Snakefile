@@ -1,9 +1,13 @@
 import pandas as pd
 m = pd.read_csv("samples/ronca_metadata_final.csv", header = 0)
 PLATES = m['plate_barcode'].unique().tolist() 
-SAMPLES = m['well_barcode'].unique().tolist() # well barcode
+SAMPLES = m['well_barcodefull'].unique().tolist() # well barcode
 LANES = m['seqsomm'].unique().tolist() # somm
 READS = ["1", "2"]
+
+#print(PLATES)
+#print(SAMPLES)
+#print(LANES)
 
 rule all:
     input: 
