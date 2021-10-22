@@ -187,3 +187,23 @@ Use snakemake@input[["name"]] to access in R. Often best to `unlist`
 ### Running Rmd
 
  - https://github.com/dib-lab/2020-ibd/blob/master/snakemake_figure_rmd.Rmd
+ 
+ 
+ Rule to do multifq:
+ 
+```
+rule multiqc:
+    output:
+        mqc_out = directory('multiqc_out'),
+        mqc_in  = directory('multiqc_in'),
+    input:
+        salmon =   expand("salmon.{cond}_{rep}", cond=CONDITIONS, rep=REPLICATES),
+        kallisto = expand("kallisto.{cond}_{rep}", cond=CONDITIONS, rep=REPLICATES),
+        fastqc =   expand("reads.{cond}_{rep}_{end}_fastqc.zip", cond=CONDITIONS, rep=REPLICATES, end=["1","2"]),
+    shell:
+      r"""mkdir {output.mqc_in}
+          ln -snr -t {output.mqc_in} {input}
+          multiqc {output.mqc_in} -o {output.mqc_out}
+       """
+       
+```
