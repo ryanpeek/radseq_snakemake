@@ -38,7 +38,7 @@ snakemake --until samtools_genome_coverage
 snakemake name_of_rule
 ```
 
-# Scripts within Rules
+## Scripts within Rules
 
 Use the `script:` invocation. If using `shell:` with multiple lines, use the following
 
@@ -62,9 +62,9 @@ Best to do dry run first, printing out options:
 
 `snakemake -n –p -r`
 
-## SLURM!
+## Running on `SLURM`!
 
-to just execute with more cores, try this:
+To just execute with more cores, try this:
 
 `snakemake --cores 4`
 
@@ -83,13 +83,14 @@ See examples [here](https://github.com/taylorreiter/2021-orpheum-refseq/blob/mai
  - resources, don't use more than 500 GB at a time
  - scoop in threads and resources from a rule param in snakefile
     - e.g., use 1 thread but x amount resources
+
     ```
     threads: 1
     resources:
         mem_mb=128000
     ```
 
-### Using a `config.yml`
+## Using a `config.yml`
 
 Best practice is to submit one job at a time and specify via yml file:
 
@@ -133,8 +134,7 @@ To run on cluster using default global file:
 snakemake --cluster "sbatch -t {cluster.time} -p {cluster.partition} --mem={cluster.mem}" --cluster-config ~/.config/snakemake/slurm/cluster_config.yml --jobs 2 --latency-wait=15 --use-conda
 ```
 
-
-## Example snakefiles:::	
+# Example snakefiles
 
 This one is awesome and large:
 
@@ -188,7 +188,7 @@ rule summarize_coding_assemblies:
 
 Use snakemake@input[["name"]] to access in R. Often best to `unlist` 
 
-### Running Rmd
+## Running Rmd
 
  - https://github.com/dib-lab/2020-ibd/blob/master/snakemake_figure_rmd.Rmd
  
