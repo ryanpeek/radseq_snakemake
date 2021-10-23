@@ -16,9 +16,9 @@ library(glue)
 
 This is just stream of consciousness general notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk. :)
 
-## Rules
+# Rules
 
-### Running Rules
+## Running Rules
 
 Can't run single rules with wildcards, but can run up-to a specific rule.
 
@@ -28,19 +28,19 @@ Try to run up to (but not run) the `samtools_genome_coverage`
 snakemake --until samtools_genome_coverage
 ```
 
-### View Rules
+## View Rules
 
 `grep rule Snakefile`
 
-### Run a Single Rule
+## Run a Single Rule
 
 ```
 snakemake name_of_rule
 ```
 
-## Call a Script
+# Scripts within Rules
 
-Use the `script` invocation. If using `shell:` with multiple lines, use the following
+Use the `script:` invocation. If using `shell:` with multiple lines, use the following
 
 ```
 rule clean:
@@ -48,13 +48,17 @@ rule clean:
 		"""
 		  do some things here
 		  then do some more
-		  can use a "\" to separate to another lines
+		  can use a "\" to separate to another line
 		"""
 ```
 
-## Dry Run!
+# Running `Snakemake`
 
-dry-run, print shell commands and reason for execution
+Best to do dry run first, printing out options:
+
+ - dry-run (`n`)
+ - print shell commands (`p`)
+ - reason for execution (`r`)
 
 `snakemake -n –p -r`
 
@@ -62,7 +66,7 @@ dry-run, print shell commands and reason for execution
 
 to just execute with more cores, try this:
 
-`snakemake --cores 8`
+`snakemake --cores 4`
 
 *check jobs with `squeue -u rapeek`*
 
