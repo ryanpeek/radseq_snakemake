@@ -9,3 +9,4 @@ inputs/*
 outputs/*
 slurms/*
 slurm-*
+*.html
