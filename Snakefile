@@ -11,7 +11,7 @@ READS = ["1", "2"]
 
 rule all:
     input: 
-        expand("outputs/fastq_split/{lane}_{plate}_R{read}_{sample}.fastq", lane = LANES, plate = PLATES, sample = SAMPLES, read = READS)
+        expand("outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam", lane = LANES, plate = PLATES, sample = SAMPLES)
 # should look like this: SOMM504_CGTCTT_R1_GGGCTAACGATGCAGG.fastq after perl output
 
 # remove expand here so that it runs rule once instead twice (for each R1 and R2)
@@ -38,9 +38,21 @@ rule well_split_fastq:
     """
 
 # rule to align and combine
-rul align_fastq:
-	input: expand("output/bams/{{lane}}_{{plate}}_{sample}", sample = SAMPLES)
+rule align_fastq:
+    input: 
+        fq = expand("outputs/fastq_split/{{lane}}_{{plate}}_R{read}_{{sample}}.fastq", read = READS),
+	ref = "/home/rapeek/projects/SEQS/final_contigs_300.fa"
+    output: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
+    shell:"""
+	bwa mem {input.ref} {input.fq} | samtools view -Sb - | samtools sort - -o {output}
+	"""
 
+rule filter_bams:
+    input: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
+    output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
+    shell:"""
+       samtools view -f 0x2 -b {input} | samtools rmdup - {output}
+       """
 
 
 # TODO combine across lanes, use this approach as a template to cat either fastqs or bams
