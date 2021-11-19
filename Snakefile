@@ -43,6 +43,7 @@ rule align_fastq:
         fq = expand("outputs/fastq_split/{{lane}}_{{plate}}_R{read}_{{sample}}.fastq", read = READS),
 	ref = "/home/rapeek/projects/SEQS/final_contigs_300.fa"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
+    conda: "envs/samtools_bwa.yml"
     shell:"""
 	bwa mem {input.ref} {input.fq} | samtools view -Sb - | samtools sort - -o {output}
 	"""
@@ -50,6 +51,7 @@ rule align_fastq:
 rule filter_bams:
     input: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
+    conda: "envs/samtools_bwa.yml"
     shell:"""
        samtools view -f 0x2 -b {input} | samtools rmdup - {output}
        """
