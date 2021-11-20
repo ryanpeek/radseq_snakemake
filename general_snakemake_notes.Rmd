@@ -104,7 +104,7 @@ Best practice is to submit one job at a time and specify via yml file:
 ```
 # cluster_config.yml - cluster configuration
 __default__:
-    account: ctbrowngrp
+    account: millermrgrp
     partition: med
     time: 1-00:05:00 # time limit per job (1 day, 5 min; fmt = dd-hh:mm:ss)
     nodes: 1 # per job
