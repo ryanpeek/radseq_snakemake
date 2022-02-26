@@ -37,7 +37,7 @@ rule plate_split_fastq:
         mem_mb=2000,
 	#tmpdir=TMPDIR,
         time=2880
-    benchmark: "benchmarks/plate_split_{lane}_{plate}_R{read}.tsv" 
+    #benchmark: "benchmarks/plate_split_{lane}_{plate}_R{read}.tsv" 
     shell:"""
     grep --no-group-separator -A 3 ":{wildcards.plate}" {input} > {output}
     """
@@ -50,7 +50,7 @@ rule well_split_fastq:
         mem_mb=2000,
 	#tmpdir=TMPDIR,
         time=2880
-    benchmark: "benchmarks/well_split_fastq_{lane}_{plate}_R{read}_{sample}.tsv"
+    #benchmark: "benchmarks/well_split_fastq_{lane}_{plate}_R{read}_{sample}.tsv"
     params: outdir = "outputs/fastq_split/"
     shell:"""
     /home/rapeek/projects/SEQS/code/BarcodeSplit_RAD_PE.2019.pl {input} GGACAAGCTATGCAGG,GGAAACATCGTGCAGG,GGACATTGGCTGCAGG,GGACCACTGTTGCAGG,GGAACGTGATTGCAGG,GGCGCTGATCTGCAGG,GGCAGATCTGTGCAGG,GGATGCCTAATGCAGG,GGAACGAACGTGCAGG,GGAGTACAAGTGCAGG,GGCATCAAGTTGCAGG,GGAGTGGTCATGCAGG,GGAACAACCATGCAGG,GGAACCGAGATGCAGG,GGAACGCTTATGCAGG,GGAAGACGGATGCAGG,GGAAGGTACATGCAGG,GGACACAGAATGCAGG,GGACAGCAGATGCAGG,GGACCTCCAATGCAGG,GGACGCTCGATGCAGG,GGACGTATCATGCAGG,GGACTATGCATGCAGG,GGAGAGTCAATGCAGG,GGAGATCGCATGCAGG,GGAGCAGGAATGCAGG,GGAGTCACTATGCAGG,GGATCCTGTATGCAGG,GGATTGAGGATGCAGG,GGCAACCACATGCAGG,GGCAAGACTATGCAGG,GGCAATGGAATGCAGG,GGCACTTCGATGCAGG,GGCAGCGTTATGCAGG,GGCATACCAATGCAGG,GGCCAGTTCATGCAGG,GGCCGAAGTATGCAGG,GGCCGTGAGATGCAGG,GGCCTCCTGATGCAGG,GGCGAACTTATGCAGG,GGCGACTGGATGCAGG,GGCGCATACATGCAGG,GGCTCAATGATGCAGG,GGCTGAGCCATGCAGG,GGCTGGCATATGCAGG,GGGAATCTGATGCAGG,GGGACTAGTATGCAGG,GGGAGCTGAATGCAGG,GGGATAGACATGCAGG,GGGCCACATATGCAGG,GGGCGAGTAATGCAGG,GGGCTAACGATGCAGG,GGGCTCGGTATGCAGG,GGGGAGAACATGCAGG,GGGGTGCGAATGCAGG,GGGTACGCAATGCAGG,GGGTCGTAGATGCAGG,GGGTCTGTCATGCAGG,GGGTGTTCTATGCAGG,GGTAGGATGATGCAGG,GGTATCAGCATGCAGG,GGTCCGTCTATGCAGG,GGTCTTCACATGCAGG,GGTGAAGAGATGCAGG,GGTGGAACAATGCAGG,GGTGGCTTCATGCAGG,GGTGGTGGTATGCAGG,GGTTCACGCATGCAGG,GGACACGAGATGCAGG,GGAAGAGATCTGCAGG,GGAAGGACACTGCAGG,GGAATCCGTCTGCAGG,GGAATGTTGCTGCAGG,GGACACTGACTGCAGG,GGACAGATTCTGCAGG,GGAGATGTACTGCAGG,GGAGCACCTCTGCAGG,GGAGCCATGCTGCAGG,GGAGGCTAACTGCAGG,GGATAGCGACTGCAGG,GGACGACAAGTGCAGG,GGATTGGCTCTGCAGG,GGCAAGGAGCTGCAGG,GGCACCTTACTGCAGG,GGCCATCCTCTGCAGG,GGCCGACAACTGCAGG,GGAGTCAAGCTGCAGG,GGCCTCTATCTGCAGG,GGCGACACACTGCAGG,GGCGGATTGCTGCAGG,GGCTAAGGTCTGCAGG,GGGAACAGGCTGCAGG,GGGACAGTGCTGCAGG,GGGAGTTAGCTGCAGG,GGGATGAATCTGCAGG,GGGCCAAGACTGCAGG {params.outdir}{wildcards.lane}_{wildcards.plate}
@@ -68,9 +68,9 @@ rule align_fastq:
         mem_mb=2000,
 	#tmpdir=TMPDIR,
         time=2880
-    benchmark: "benchmarks/align_fastq_{lane}_{plate}_{sample}.tsv"
+    #benchmark: "benchmarks/align_fastq_{lane}_{plate}_{sample}.tsv"
     shell:"""
-	bwa mem {input.ref} {input.fq} | samtools view -Sb - | samtools sort - -o {output}
+        bwa mem {input.ref} {input.fq} | samtools view -Sb - | samtools sort - -o {output}
 	"""
 
 rule filter_bams:
@@ -82,34 +82,28 @@ rule filter_bams:
         mem_mb=2000,
 	#tmpdir=TMPDIR,
         time=2880
-    benchmark: "benchmarks/filter_bams_{lane}_{plate}_{sample}.tsv"
+    #benchmark: "benchmarks/filter_bams_{lane}_{plate}_{sample}.tsv"
     shell:"""
-       samtools view -f 0x2 -b {input} | samtools rmdup - {output}
-       """
+        samtools view -f 0x2 -b {input} | samtools rmdup - {output}
+        """
 
+rule index_bams:
+    input: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
+    output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai"
+    conda: "envs/samtools_bwa.yml"
+    threads: 1
+    resources:
+        mem_mb=2000,
+        time=2880
+    shell:"""
+        samtools index {input}
+	"""
 
-# TODO combine across lanes, use this approach as a template to cat either fastqs or bams
-#rule cat_libraries_R2:
-#    input: expand("inputs/raw/{sample}_2.fastq.gz", sample = SAMPLES)
-#    output: expand("inputs/cat/{library}_2.fastq.gz", library = LIBRARIES)
-#    threads: 1
-#    resources:
-#        mem_mb=4000
-#    run: 
-#        merge_df = m[['library_name','run_accession']]
-#        merge_df = copy.deepcopy(merge_df)
-#        merge_df['run_accession'] = merge_df['run_accession'].apply(lambda x: f"inputs/raw/{x}_2.fastq.gz")
-#        merge_dict = merge_df.groupby('library_name')['run_accession'].apply(lambda g: g.values.tolist()).to_dict()
-#        for library in merge_dict.keys():
-#            # merge SRR files
-#            to_merge = merge_dict[library]
-#            # Check if the merged file results from a single or multiple fastq files.
-#            # For n-to-1 merging, concatenate input files to produce the output file
-#            merge_nb = len(to_merge)
-#            if merge_nb > 1:
-#                cmd = "cat " + " ".join(to_merge) + " > " + "inputs/cat/" + library + "_2.fastq.gz"
-#            else:
-#                cmd = "ln --relative --force -s " + " ".join(to_merge) + " inputs/cat/" + library + "_2.fastq.gz"
-#            os.system(cmd)
+# to add:
+# pca w angsd (need angsd enviro)
+# sfs
+# thetas
+# admixture
+# fst
 
 
