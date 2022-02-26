@@ -99,6 +99,17 @@ rule index_bams:
         samtools index {input}
 	"""
 
+rule bam_stats:
+	input:
+		bam = "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam",
+		bai = "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
+	output:	"outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats"
+	threads: 1
+	conda: "envs/samtools_bwa.yml"
+	shell:"""
+	    samtools stats {input.bam} | grep ^SN | cut -f 2- > {output}
+	    """
+
 # to add:
 # pca w angsd (need angsd enviro)
 # sfs
