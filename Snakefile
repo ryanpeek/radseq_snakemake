@@ -12,8 +12,9 @@ TMPDIR = "/scratch/rapeek"
 
 rule all:
     input: 
-        expand("outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam", lane = LANES, plate = PLATES, sample = SAMPLES)
-# should look like this: SOMM504_CGTCTT_R1_GGGCTAACGATGCAGG.fastq after perl output
+        expand("outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai", lane = LANES, plate = PLATES, sample = SAMPLES),
+	expand("outputs/bamlists/{lane}_all.bamlist", lane = LANES),
+	expand("outputs/pca/{lane}_pca_all.covMat", lane = LANES)
 
 # remove expand here so that it runs rule once instead twice (for each R1 and R2)
 rule unzip:
@@ -100,15 +101,36 @@ rule index_bams:
 	"""
 
 rule bam_stats:
-	input:
-		bam = "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam",
-		bai = "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
-	output:	"outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats"
-	threads: 1
-	conda: "envs/samtools_bwa.yml"
-	shell:"""
-	    samtools stats {input.bam} | grep ^SN | cut -f 2- > {output}
-	    """
+    input:
+        bam = "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam",
+	bai = "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai"
+    output: "outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats"
+    threads: 1
+    conda: "envs/samtools_bwa.yml"
+    shell:"""
+        samtools stats {input.bam} | grep ^SN | cut -f 2- > {output}
+	"""
+rule make_bamlist:
+    input: expand("outputs/bams/{{lane}}_{plate}_{sample}.sort.flt.bam", plate = PLATES, sample = SAMPLES)
+    output: "outputs/bamlists/{lane}_all.bamlist"
+    threads: 1
+    shell:"""
+        ls {input} > {output}
+	"""
+rule make_pca:
+    input: 
+        bamlist = "outputs/bamlists/{lane}_all.bamlist",
+        ref = "/home/rapeek/projects/SEQS/final_contigs_300.fa", # put in config file
+        bait_length = "bait_lengths.txt" # put in config file, add copy in github
+    output: "outputs/pca/{lane}_pca_all.covMat"
+    params: 
+        minInd = lambda wildcards, input: len(open(input.bamlist).readlines( ))/5
+	#minInd = lambda wildcards, input: sum(1 for line in open(input.bamlist))/5
+    shell:"""
+        angsd -bam {input.bamlist} -out {output} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads 16 -ref {input.ref} -sites {input.bait_length}
+        """
+
+
 
 # to add:
 # pca w angsd (need angsd enviro)
