@@ -218,3 +218,15 @@ rule multiqc:
        """
        
 ```
+
+## to run a single rule
+
+Make sure that the rule has some component in the `rule_all` and then run.
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 -k -n -p --until make_bamlist
+```
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 --resources mem_mb=500000 --cluster "sbatch -t 1440 -J pca -p high -n 1 -N 1 -c 1 --mail-user=rapeek@ucdavis.edu -o slurms/pca_%j.out -e slurms/pca_%j.err" -k -p -r
+```
