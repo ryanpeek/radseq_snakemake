@@ -219,6 +219,25 @@ rule multiqc:
        
 ```
 
+## Run snakemake using profile
+
+We can setup a profile file to do this that will live here:
+
+`~/.config/snakemake/`
+
+Then we setup things as we like and then when running, we can use default:
+
+```
+snakemake --profile default -n
+```
+
+Or try a specific `farm` option:
+
+`snakemake --profile slurm_farm --cluster-config cluster_config.yml -n`
+
+
+
+
 ## to run a single rule
 
 Make sure that the rule has some component in the `rule_all` and then run.
