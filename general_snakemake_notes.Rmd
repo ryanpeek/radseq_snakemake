@@ -236,8 +236,6 @@ Or try a specific `farm` option:
 `snakemake --profile slurm_farm --cluster-config cluster_config.yml -n`
 
 
-
-
 ## to run a single rule
 
 Make sure that the rule has some component in the `rule_all` and then run.
@@ -248,13 +246,19 @@ snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 -k -n -p --unti
 
 # Snakemake runs
 
-```
-snakemake -j 16 --use-conda --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster.nodes}" --latency-wait=15	--profile slurm_farm --cluster-config cluster_config.yml -k -p -r -n
-```
 
+WORKS!! 
 
 ```
-snakemake -j 16 --use-conda --cluster "sbatch -t 1440 -J pca -p high -n 1 -N 1 -c 1 --mail-user=rapeek@ucdavis.edu -o slurms/pca_%j.out -e slurms/pca_%j.err" -k -p -r
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait=15 --resources mem_mb=200000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --cluster-config cluster_config.yml -k -p -r -n
+```
+
+```
+snakemake -j 16 --use-conda --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} --mail-type={cluster.mail-type -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r -n
+```
+
+```
+snakemake -j 16 --use-conda --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} --mail-type={cluster.mail-type -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r
 ```
 
 ```
