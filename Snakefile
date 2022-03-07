@@ -14,6 +14,7 @@ rule all:
     input: 
         expand("outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai", lane = LANES, plate = PLATES, sample = SAMPLES),
 	#expand("outputs/bamlists/{lane}_all.bamlist", lane = LANES)
+	expand("outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats", lane = LANES, plate = PLATES, sample = SAMPLES),
 	expand("outputs/pca/{lane}_pca_all.covMat", lane = LANES)
 
 # remove expand here so that it runs rule once instead twice (for each R1 and R2)
@@ -106,7 +107,7 @@ rule bam_stats:
     threads: 1
     conda: "envs/samtools_bwa.yml"
     shell:"""
-        samtools stats {input.bam} | grep ^SN | cut -f 2-4 > {output}
+        samtools stats {input} | grep ^SN | cut -f 2-4 > {output}
 	"""
 rule make_bamlist:
     input: expand("outputs/bams/{{lane}}_{plate}_{sample}.sort.flt.bam", plate = PLATES, sample = SAMPLES)
