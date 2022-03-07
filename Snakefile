@@ -126,7 +126,7 @@ rule make_pca:
     #conda: "envs/angsd.yml"
     params: 
         minInd = lambda wildcards, input: round(len(open(input.bamlist).readlines( ))/5),
-	covMat = lambda wildcards: "outputs/pca/" + wildcards.lane + "pca_all"
+	covMat = lambda wildcards: "outputs/pca/" + wildcards.lane + "_pca_all"
     resources:
         time=1080,
 	mem_mb=lambda wildcards, attempt: attempt *8000
