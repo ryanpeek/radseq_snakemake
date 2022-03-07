@@ -2,7 +2,7 @@
 __default__:
     account: millermrgrp
     partition: high
-    mail-type: FAIL,TIME_LIMIT
+    mail-type: FAIL,TIME_LIMIT, OUT_OF_MEMORY
     mail-user: rapeek@ucdavis.edu
     time: 1-00:05:00 # time of 1 day, 5 min (fmt = dd-hh:mm::ss)
     mem: 4000

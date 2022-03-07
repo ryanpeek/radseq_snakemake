@@ -123,17 +123,19 @@ rule make_pca:
         ref = "/home/rapeek/projects/SEQS/final_contigs_300.fa", # put in config file
         bait_length = "bait_lengths.txt" # put in config file, add copy in github
     output: "outputs/pca/{lane}_pca_all.covMat"
+    threads: 16
+    #conda: "envs/angsd.yml"
     params: 
-        minInd = lambda wildcards, input: len(open(input.bamlist).readlines( ))/5
-	#minInd = lambda wildcards, input: sum(1 for line in open(input.bamlist))/5
+        minInd = lambda wildcards, input: round(len(open(input.bamlist).readlines( ))/5),
+	covMat = lambda wildcards: "outputs/pca/" + wildcards.lane + "pca_all"
+    resources:
+        time=1080,
+	mem_mb=lambda wildcards, attempt: attempt *8000
     shell:"""
-        angsd -bam {input.bamlist} -out {output} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads 16 -ref {input.ref} -sites {input.bait_length}
+        angsd -bam {input.bamlist} -out {params.covMat} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads 16 -ref {input.ref} -sites {input.bait_length}
         """
 
-
-
 # to add:
-# pca w angsd (need angsd enviro)
 # sfs
 # thetas
 # admixture
