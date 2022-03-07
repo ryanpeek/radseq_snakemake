@@ -45,3 +45,11 @@ To keep vim open: `Ctrl + z`, and return or reopen: `fg`
     - `d` to delete, 
     - `c` to change
   - Press escape when done
+  
+  
+## Scrolling in screen
+
+When in screen:
+
+`Ctrl` + A, then `Esc` then arrow up/down or scroll!
+
