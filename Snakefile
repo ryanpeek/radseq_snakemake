@@ -14,7 +14,7 @@ rule all:
     input: 
         expand("outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai", lane = LANES, plate = PLATES, sample = SAMPLES),
 	#expand("outputs/bamlists/{lane}_all.bamlist", lane = LANES)
-	expand("outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats", lane = LANES, plate = PLATES, sample = SAMPLES),
+	#expand("outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats", lane = LANES, plate = PLATES, sample = SAMPLES),
 	expand("outputs/pca/{lane}_pca_all.covMat", lane = LANES)
 
 # remove expand here so that it runs rule once instead twice (for each R1 and R2)
@@ -129,7 +129,8 @@ rule make_pca:
 	covMat = lambda wildcards: "outputs/pca/" + wildcards.lane + "_pca_all"
     resources:
         time=1080,
-	mem_mb=lambda wildcards, attempt: attempt *8000
+	mem_mb=64000
+	#mem_mb=lambda wildcards, attempt: attempt *8000
     shell:"""
         angsd -bam {input.bamlist} -out {params.covMat} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads 16 -ref {input.ref} -sites {input.bait_length}
         """
