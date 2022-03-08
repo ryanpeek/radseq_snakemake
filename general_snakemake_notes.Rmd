@@ -250,15 +250,15 @@ snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 -k -n -p --unti
 WORKS!! 
 
 ```
-snakemake -j 16 --use-conda --rerun-incomplete --latency-wait=15 --resources mem_mb=200000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --cluster-config cluster_config.yml -k -p -r -n
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait=15 --resources mem_mb=200000 --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --cluster-config cluster_config.yml -k -p -r -n
 ```
 
 ```
-snakemake -j 16 --use-conda --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} --mail-type={cluster.mail-type -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r -n
+snakemake -j 16 --use-conda --rerun-incomplete --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r -n
 ```
 
 ```
-snakemake -j 16 --use-conda --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} --mail-type={cluster.mail-type -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r
+snakemake -j 16 --use-conda --rerun-incomplete --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} --mail-type={cluster.mail-type -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r
 ```
 
 ```
