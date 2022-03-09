@@ -14,7 +14,7 @@ library(glue)
 ```
 
 
-This is just stream of consciousness general notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk. :)
+A general stream of consciousness of notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk.
 
 # Rules
 
@@ -247,20 +247,46 @@ snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 -k -n -p --unti
 # Snakemake runs
 
 
-WORKS!! 
+Here we specify a local `cluster_config` file to run things with. Importantly we need to specify `--mem={resources.mem_mb}` and `{threads}` here to make the options in the snakefile rules functional, otherwise defaults to config or default snakmake.
+
+This rule uses a config file in the `.config/snakemake` dir:
 
 ```
-snakemake -j 16 --use-conda --rerun-incomplete --latency-wait=15 --resources mem_mb=200000 --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --cluster-config cluster_config.yml -k -p -r -n
+snakemake -j 16 --use-conda --rerun-incomplete --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} -c {threads} --mem={resources.mem_mb} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r -n
 ```
 
-```
-snakemake -j 16 --use-conda --rerun-incomplete --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r -n
-```
+If we want to specify a local config file, we might see this:
 
 ```
-snakemake -j 16 --use-conda --rerun-incomplete --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} --mail-user={cluster.mail-user} --mail-type={cluster.mail-type -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r
+# cluster_config.yml - cluster configuration
+__default__:
+    account: millermrgrp
+    partition: high
+    mail-type: FAIL,TIME_LIMIT
+    mail-user: rapeek@ucdavis.edu
+    time: 1-00:05:00 # time of 1 day, 5 min (fmt = dd-hh:mm::ss)
+    mem: 16000
+    nodes: 1
+    ntasks-per-node: 8
+    output: slurms/slurm-%j.out
+    error: slurms/slurm-%j.err
+    job-name: '{rule}' # could use {output} or {rule}.{wildcards}
+    #chdir: '/home/rapeek/'
+    #logdir: '/home/rapeek/'
 ```
 
+
+And then use this for the `snakemake` call:
+
+
 ```
-snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 --resources mem_mb=500000 --cluster "sbatch -t 1440 -J pca -p high -n 1 -N 1 -c 1 --mail-user=rapeek@ucdavis.edu -o slurms/pca_%j.out -e slurms/pca_%j.err" -k -p -r -n
+snakemake -j 16 --use-conda --rerun-incomplete --restart-times 3 --latency-wait=15 --resources mem_mb=200000 --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster.nodes} -c {threads} --mem={resources.mem_mb} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --cluster-config cluster_config.yml -k -p -r
 ```
+
+This uses no `config` basically uses hard coded options:
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 --resources mem_mb=500000 --cluster "sbatch -t 1440 -J pca -p high -n 1 -N 1 -c {threads} --mem={resources.mem_mb} --mail-user=rapeek@ucdavis.edu -o slurms/pca_%j.out -e slurms/pca_%j.err" -k -p -r -n
+```
+
+
