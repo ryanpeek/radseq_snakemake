@@ -26,7 +26,7 @@ rule unzip:
         mem_mb=2000,
 	#tmpdir=TMPDIR,
         time=2880
-    benchmark: "benchmarks/unzip_fastq_{lane}_R{read}.tsv"
+    #benchmark: "benchmarks/unzip_fastq_{lane}_R{read}.tsv"
     shell:'''
     gunzip -c {input} > {output}
     '''
@@ -39,11 +39,10 @@ rule plate_split_fastq:
         mem_mb=2000,
 	#tmpdir=TMPDIR,
         time=2880
-    #benchmark: "benchmarks/plate_split_{lane}_{plate}_R{read}.tsv" 
+    benchmark: "benchmarks/plate_split_{lane}_{plate}_R{read}.tsv" 
     shell:"""
     grep --no-group-separator -A 3 ":{wildcards.plate}" {input} > {output}
     """
-# could use checkpoint: flexible, allows unknown number of outputs or output names, wrap directory
 rule well_split_fastq:
     input: expand("outputs/fastq_plate/{{lane}}_{{plate}}_R{read}.fastq", read = READS)
     output: expand("outputs/fastq_split/{{lane}}_{{plate}}_R{read}_{sample}.fastq", sample = SAMPLES, read = READS)
@@ -65,40 +64,40 @@ rule align_fastq:
 	ref = "/home/rapeek/projects/SEQS/final_contigs_300.fa"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
     conda: "envs/samtools_bwa.yml"
-    threads: 1
+    threads: 4
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
 	#tmpdir=TMPDIR,
         time=2880
-    #benchmark: "benchmarks/align_fastq_{lane}_{plate}_{sample}.tsv"
+    benchmark: "benchmarks/align_fastq_{lane}_{plate}_{sample}.tsv"
     shell:"""
-        bwa mem {input.ref} {input.fq} | samtools view -Sb - | samtools sort - -o {output}
+	bwa mem -t {threads} {input.ref} {input.fq} | samtools view --threads {threads} -Sb - | samtools sort --threads {threads} - -o {output}
 	"""
 
 rule filter_bams:
     input: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
     conda: "envs/samtools_bwa.yml"
-    threads: 1
+    threads: 4
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
 	#tmpdir=TMPDIR,
         time=2880
     #benchmark: "benchmarks/filter_bams_{lane}_{plate}_{sample}.tsv"
     shell:"""
-        samtools view -f 0x2 -b {input} | samtools rmdup - {output}
+        samtools view --threads {threads} -f 0x2 -b {input} | samtools rmdup --threads {threads} - {output}
         """
 
 rule index_bams:
     input: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai"
     conda: "envs/samtools_bwa.yml"
-    threads: 1
+    threads: 4
     resources:
         mem_mb=2000,
         time=2880
     shell:"""
-        samtools index {input}
+        samtools index --threads {threads} {input}
 	"""
 
 rule bam_stats:
@@ -107,7 +106,7 @@ rule bam_stats:
     threads: 1
     conda: "envs/samtools_bwa.yml"
     shell:"""
-        samtools stats {input} | grep ^SN | cut -f 2-4 > {output}
+        samtools stats --threads {threads} {input} | grep ^SN | cut -f 2-4 > {output}
 	"""
 rule make_bamlist:
     input: expand("outputs/bams/{{lane}}_{plate}_{sample}.sort.flt.bam", plate = PLATES, sample = SAMPLES)
@@ -128,10 +127,10 @@ rule make_pca:
         minInd = lambda wildcards, input: round(len(open(input.bamlist).readlines( ))/5),
 	covMat = lambda wildcards: "outputs/pca/" + wildcards.lane + "_pca_all"
     resources:
-        time=1080
-	#mem_mb=lambda wildcards, attempt: attempt *8000
+        time=1080,
+	mem_mb=lambda wildcards, attempt: attempt *8000
     shell:"""
-        angsd -bam {input.bamlist} -out {params.covMat} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads 16 -ref {input.ref} -sites {input.bait_length}
+        angsd -bam {input.bamlist} -out {params.covMat} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads {threads} -ref {input.ref} -sites {input.bait_length}
         """
 
 # to add:
