@@ -65,9 +65,9 @@ rule align_fastq:
 	ref = "/home/rapeek/projects/SEQS/final_contigs_300.fa"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
     conda: "envs/samtools_bwa.yml"
-    threads: 1
+    threads: 4
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
 	#tmpdir=TMPDIR,
         time=2880
     #benchmark: "benchmarks/align_fastq_{lane}_{plate}_{sample}.tsv"
@@ -79,9 +79,9 @@ rule filter_bams:
     input: "outputs/bams/{lane}_{plate}_{sample}.sort.bam"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
     conda: "envs/samtools_bwa.yml"
-    threads: 1
+    threads: 4
     resources:
-        mem_mb=2000,
+        mem_mb=4000,
 	#tmpdir=TMPDIR,
         time=2880
     #benchmark: "benchmarks/filter_bams_{lane}_{plate}_{sample}.tsv"
@@ -93,7 +93,7 @@ rule index_bams:
     input: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam"
     output: "outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai"
     conda: "envs/samtools_bwa.yml"
-    threads: 1
+    threads: 4
     resources:
         mem_mb=2000,
         time=2880
@@ -128,8 +128,8 @@ rule make_pca:
         minInd = lambda wildcards, input: round(len(open(input.bamlist).readlines( ))/5),
 	covMat = lambda wildcards: "outputs/pca/" + wildcards.lane + "_pca_all"
     resources:
-        time=1080
-	#mem_mb=lambda wildcards, attempt: attempt *8000
+        time=1080,
+	mem_mb=lambda wildcards, attempt: attempt *8000
     shell:"""
         angsd -bam {input.bamlist} -out {params.covMat} -doIBS 1 -doCounts 1 -doMajorMinor 1 -minFreq 0.05 -maxMis {params.minInd} -minMapQ 30 -minQ 20 -SNP_pval 1e-6 -makeMatrix 1 -doCov 1 -GL 1 -doMaf 1 -nThreads 16 -ref {input.ref} -sites {input.bait_length}
         """
