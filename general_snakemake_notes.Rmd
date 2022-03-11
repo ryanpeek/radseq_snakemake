@@ -16,6 +16,16 @@ library(glue)
 
 A general stream of consciousness of notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk.
 
+# `conda`
+
+Install stuff on conda:
+
+```
+conda install -c bioconda csvtk
+```
+
+
+
 # Rules
 
 ## Running Rules
