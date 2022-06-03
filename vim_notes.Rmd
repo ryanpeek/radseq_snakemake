@@ -10,11 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ## General `vim` Notes
 
 
-Some use tips and tricks.
+Some use tips and tricks. See [here](https://ryanpeek.org/radseq/background_bash.html)
 
 ```
 :set nu  # set line numbers
-:tabnew  # start a new tab
+:tabnew  # start a new tab + file name or dir for existing files
 gt   # scroll between tabs
 GG   # go to bottom of file
 gg   # go to top of file
@@ -31,5 +31,25 @@ To switch between different tabs:
 gt
 ```
 
-To keep vim open: `Ctrl + z`, and return or reopen: `gt`
+To keep vim open: `Ctrl + z`, and return or reopen: `fg`
+
+## Column Wise Edits
+
+ - Move cursor to location you want to work from
+ - Press `Ctrl + v` 
+ - then mark across the column you want to edit 
+ - Use `shift + g` to move to bottom, `gg` to top
+    - `Shift + i` to insert text at the beginning of the column
+    - `Shift + a` to append text,
+    - `r` to replace highlighted text, 
+    - `d` to delete, 
+    - `c` to change
+  - Press escape when done
+  
+  
+## Scrolling in screen
+
+When in screen:
+
+`Ctrl` + A, then `Esc` then arrow up/down or scroll!
 

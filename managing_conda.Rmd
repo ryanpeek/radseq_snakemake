@@ -1,0 +1,96 @@
+---
+title: "managing_conda"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Getting started with `conda`
+
+This is a short set of notes on managing my conda/mamba environments. It's amazing once you get going but takes a little time.
+
+Some additional resources:
+
+ - [ngs_datalab workshop](https://ngs-docs.github.io/2021-august-remote-computing/installing-software-on-remote-computers-with-conda.html)
+ 
+
+## Installing `conda`
+
+Notes on how to do that here, best to use mamba/miniconda, but there are many flavors: https://docs.conda.io/en/latest/miniconda.html
+
+Once miniconda has been successfully installed, we can use 
+
+`conda install -n base -c conda-forge mamba` to install `mamba` which is very fast.
+
+Add channels (last one run is first channel checked):
+
+```
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+## Update `conda` & `mamba`
+
+```
+mamba update -n base mamba
+```
+
+# Environments with `conda`
+
+## Creating an Environment
+
+If we want to make a new environment, we can use mamba for creating and install.
+
+Let's try an `angsd` env:
+
+```
+mamba create -n angsd -y angsd
+```
+
+Here we created an environment named `angsd` and installed `angsd` to that environment (and `y` so we agree to install)
+
+## List software in environments
+
+`conda list <packagename>`
+
+## Install package to environment
+
+```
+mamba install -n angsd -y <package>
+```
+
+## Undo changes to an environment
+
+See what changed with the `--revisions` flag.  Then we can specify we want to install a specific revision.
+
+```
+mamba list -n angsd --revisions
+mamba install -n angsd --revision 1
+```
+
+## Remove an env
+
+Remove it if you don't want it anymore!
+
+```
+mamba env remove -n angsd
+```
+
+## Export an Environment to `yml`
+
+To use for future times, we can save/export our info out.
+
+```
+mamba env export -n angsd > angsd.yml
+```
+
+## Build from that file
+
+Now we can create the environment using that file:
+
+```
+mamba create --file angsd.yml
+```

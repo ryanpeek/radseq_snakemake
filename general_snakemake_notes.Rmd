@@ -14,11 +14,21 @@ library(glue)
 ```
 
 
-This is just stream of consciousness general notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk. :)
+A general stream of consciousness of notes to keep track of random notes/rules/thoughts that relate to using `snakemake`. Scroll at your own risk.
 
-## Rules
+# `conda`
 
-### Running Rules
+Install stuff on conda:
+
+```
+conda install -c bioconda csvtk
+```
+
+
+
+# Rules
+
+## Running Rules
 
 Can't run single rules with wildcards, but can run up-to a specific rule.
 
@@ -28,19 +38,19 @@ Try to run up to (but not run) the `samtools_genome_coverage`
 snakemake --until samtools_genome_coverage
 ```
 
-### View Rules
+## View Rules
 
 `grep rule Snakefile`
 
-### Run a Single Rule
+## Run a Single Rule
 
 ```
 snakemake name_of_rule
 ```
 
-## Call a Script
+## Scripts within Rules
 
-Use the `script` invocation. If using `shell:` with multiple lines, use the following
+Use the `script:` invocation. If using `shell:` with multiple lines, use the following
 
 ```
 rule clean:
@@ -48,31 +58,63 @@ rule clean:
 		"""
 		  do some things here
 		  then do some more
-		  can use a "\" to separate to another lines
+		  can use a "\" to separate to another line
 		"""
 ```
 
-## Dry Run!
+# Running `Snakemake`
 
-dry-run, print shell commands and reason for execution
+## Set up Interactive Session
+
+`srun -p high -J snakes -t 12:00:00 --mem=10G --pty /bin/bash -il`
+
+Best to do dry run first, printing out options:
+
+ - dry-run (`n`)
+ - print shell commands (`p`)
+ - reason for execution (`r`)
 
 `snakemake -n –p -r`
 
-## SLURM!
+## Running on `SLURM`!
 
-to just execute with more cores, try this:
+To just execute with more cores, try this:
 
-`snakemake --cores 8`
+`snakemake --cores 4`
+
+*check jobs with `squeue -u rapeek`*
 
 There's a nice list of tricks here:
  - https://github.com/dib-lab/farm-notes/blob/master/snakemake-slurm.md
+ - https://bluegenes.github.io/hpc-snakemake-tips/
+
+See examples [here](https://github.com/taylorreiter/2021-orpheum-refseq/blob/main/Snakefile).
+
+`snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 --resources mem_mb=500000 --cluster "sbatch -t 10080 -J align -p high -n 1 -N 1 -c {threads} --mem={resources.mem_mb} --mail-user=rapeek@ucdavis.edu -o slurms/align_%j.out -e slurms/align_%j.err" -k -n`
+
+ - max of 16 jobs (don't every exceed 1/3 of cpus (33), and half of ram)
+ - always use `--rerun-incomplete`
+ - use latency-wait to give a little lag between scratch and run
+ - resources, don't use more than 500 GB at a time
+ - scoop in threads and resources from a rule param in snakefile
+    - e.g., use 1 thread but x amount resources
+
+    ```
+    threads: 1
+    resources:
+        mem_mb=128000
+    ```
+
+If job times out due to interactive session (avoid if possible), can rerun by adding the `--unlock` argument. 
+
+## Using a `config.yml`
 
 Best practice is to submit one job at a time and specify via yml file:
 
 ```
 # cluster_config.yml - cluster configuration
 __default__:
-    account: ctbrowngrp
+    account: millermrgrp
     partition: med
     time: 1-00:05:00 # time limit per job (1 day, 5 min; fmt = dd-hh:mm:ss)
     nodes: 1 # per job
@@ -109,8 +151,7 @@ To run on cluster using default global file:
 snakemake --cluster "sbatch -t {cluster.time} -p {cluster.partition} --mem={cluster.mem}" --cluster-config ~/.config/snakemake/slurm/cluster_config.yml --jobs 2 --latency-wait=15 --use-conda
 ```
 
-
-## Example snakefiles:::	
+# Example snakefiles
 
 This one is awesome and large:
 
@@ -164,6 +205,98 @@ rule summarize_coding_assemblies:
 
 Use snakemake@input[["name"]] to access in R. Often best to `unlist` 
 
-### Running Rmd
+## Running Rmd
 
  - https://github.com/dib-lab/2020-ibd/blob/master/snakemake_figure_rmd.Rmd
+ 
+ 
+ Rule to do multifq:
+ 
+```
+rule multiqc:
+    output:
+        mqc_out = directory('multiqc_out'),
+        mqc_in  = directory('multiqc_in'),
+    input:
+        salmon =   expand("salmon.{cond}_{rep}", cond=CONDITIONS, rep=REPLICATES),
+        kallisto = expand("kallisto.{cond}_{rep}", cond=CONDITIONS, rep=REPLICATES),
+        fastqc =   expand("reads.{cond}_{rep}_{end}_fastqc.zip", cond=CONDITIONS, rep=REPLICATES, end=["1","2"]),
+    shell:
+      r"""mkdir {output.mqc_in}
+          ln -snr -t {output.mqc_in} {input}
+          multiqc {output.mqc_in} -o {output.mqc_out}
+       """
+       
+```
+
+## Run snakemake using profile
+
+We can setup a profile file to do this that will live here:
+
+`~/.config/snakemake/`
+
+Then we setup things as we like and then when running, we can use default:
+
+```
+snakemake --profile default -n
+```
+
+Or try a specific `farm` option:
+
+`snakemake --profile slurm_farm --cluster-config cluster_config.yml -n`
+
+
+## to run a single rule
+
+Make sure that the rule has some component in the `rule_all` and then run.
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 -k -n -p --until make_bamlist
+```
+
+# Snakemake runs
+
+
+Here we specify a local `cluster_config` file to run things with. Importantly we need to specify `--mem={resources.mem_mb}` and `{threads}` here to make the options in the snakefile rules functional, otherwise defaults to config or default snakmake.
+
+This rule uses a config file in the `.config/snakemake` dir:
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --resources mem_mb=100000 --cluster "sbatch -t {cluster.time} -p high -N {cluster.nodes} -J {cluster.job-name} -c {threads} --mem={resources.mem_mb} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --latency-wait=15 --cluster-config ~/.config/snakemake/slurm/cluster_config.yml -k -p -r -n
+```
+
+If we want to specify a local config file, we might see this:
+
+```
+# cluster_config.yml - cluster configuration
+__default__:
+    account: millermrgrp
+    partition: high
+    mail-type: FAIL,TIME_LIMIT
+    mail-user: rapeek@ucdavis.edu
+    time: 1-00:05:00 # time of 1 day, 5 min (fmt = dd-hh:mm::ss)
+    mem: 16000
+    nodes: 1
+    ntasks-per-node: 8
+    output: slurms/slurm-%j.out
+    error: slurms/slurm-%j.err
+    job-name: '{rule}' # could use {output} or {rule}.{wildcards}
+    #chdir: '/home/rapeek/'
+    #logdir: '/home/rapeek/'
+```
+
+
+And then use this for the `snakemake` call:
+
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --restart-times 3 --latency-wait=15 --resources mem_mb=200000 --cluster "sbatch -t {cluster.time} -p {cluster.partition} -N {cluster.nodes} -c {threads} --mem={resources.mem_mb} -J {cluster.job-name} --mail-user={cluster.mail-user} -o {cluster.output} -e {cluster.error}" --cluster-config cluster_config.yml -k -p -r
+```
+
+This uses no `config` basically uses hard coded options:
+
+```
+snakemake -j 16 --use-conda --rerun-incomplete --latency-wait 15 --resources mem_mb=500000 --cluster "sbatch -t 1440 -J pca -p high -n 1 -N 1 -c {threads} --mem={resources.mem_mb} --mail-user=rapeek@ucdavis.edu -o slurms/pca_%j.out -e slurms/pca_%j.err" -k -p -r -n
+```
+
+
