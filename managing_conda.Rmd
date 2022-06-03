@@ -94,3 +94,9 @@ Now we can create the environment using that file:
 ```
 mamba create --file angsd.yml
 ```
+
+Or in conda this would be:
+
+```
+conda env create -f environment.yml
+```
