@@ -14,7 +14,7 @@ rule all:
     input: 
         expand("outputs/bams/{lane}_{plate}_{sample}.sort.flt.bam.bai", lane = LANES, plate = PLATES, sample = SAMPLES),
 	#expand("outputs/bamlists/{lane}_all.bamlist", lane = LANES)
-	#expand("outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats", lane = LANES, plate = PLATES, sample = SAMPLES),
+	expand("outputs/stats/{lane}_{plate}_{sample}.sort.flt.bam.stats", lane = LANES, plate = PLATES, sample = SAMPLES),
 	expand("outputs/pca/{lane}_pca_all.covMat", lane = LANES)
 
 # remove expand here so that it runs rule once instead twice (for each R1 and R2)
